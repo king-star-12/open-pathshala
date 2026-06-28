@@ -9,11 +9,11 @@ describes the exact, reproducible architecture used.
   pathshala.distillai.in (Route53 A/AAAA alias)
             │
             ▼
-   CloudFront distribution  ──(ACM cert, us-east-1)──┐
-            │  OAC (SigV4, signing: always)           │ TLS for the custom domain
-            ▼                                          │
-   Lambda Function URL (AuthType: AWS_IAM)  ◀──────────┘
-            │
+   CloudFront distribution  ──(ACM cert, us-east-1)── TLS for the custom domain
+            │  CachingDisabled + AllViewerExceptHostHeader
+            ▼
+   API Gateway HTTP API  (z…​.execute-api.ap-south-1, $default route)
+            │  AWS_PROXY integration, payload format 2.0
             ▼
    Lambda  openpathshala  (Node 20, arm64)
      ├─ Express app (server.js) via serverless-http (lambda.js)
@@ -31,13 +31,14 @@ describes the exact, reproducible architecture used.
 - **The LLM key never leaves AWS in plaintext.** It lives only as an SSM
   `SecureString`; the Lambda reads it at cold start with `WithDecryption`. It is
   **not** in the image, **not** in the repo, and **not** a plaintext env var.
-- **The Function URL is private (`AWS_IAM`).** Only this CloudFront distribution
-  can invoke it, via Origin Access Control (OAC) SigV4 signing. (This account's
-  guardrails also block public `AuthType: NONE` function URLs — IAM + OAC is both
-  required here and the recommended pattern.)
+- **API Gateway HTTP API as the origin.** CloudFront fronts a regional HTTP API
+  with an `AWS_PROXY` integration (payload format 2.0). This avoids the public
+  Lambda Function URL — which this account's guardrails block (`AuthType: NONE`
+  returns 403) — and is simpler and more reliable than the Function-URL + OAC
+  signing combination for an API that takes POST bodies.
 - **No caching for the API.** The default cache behavior uses the managed
-  `CachingDisabled` policy and `AllViewerExceptHostHeader` origin-request policy
-  so POST bodies pass through intact and are correctly signed.
+  `CachingDisabled` policy and the `AllViewerExceptHostHeader` origin-request
+  policy so POST bodies and headers pass through to API Gateway intact.
 
 ## Provisioned resources (account 556145169823)
 
@@ -45,11 +46,10 @@ describes the exact, reproducible architecture used.
 |---|---|---|
 | Lambda function | `openpathshala` | ap-south-1 |
 | Lambda execution role | `openpathshala-lambda-role` (+ inline `openpathshala-ssm-read`) | global |
-| Function URL | AuthType `AWS_IAM` | ap-south-1 |
+| API Gateway HTTP API | `openpathshala-http` (`$default` route → Lambda) | ap-south-1 |
 | SSM SecureString | `/openpathshala/groq-api-key` | ap-south-1 |
 | ACM certificate | `pathshala.distillai.in` | us-east-1 |
-| CloudFront OAC | `openpathshala-lambda-oac` | global |
-| CloudFront distribution | alias `pathshala.distillai.in` | global |
+| CloudFront distribution | alias `pathshala.distillai.in`, origin = API Gateway | global |
 | Route53 records | `pathshala.distillai.in` A + AAAA alias | distillai.in zone |
 
 ## Reproduce / update

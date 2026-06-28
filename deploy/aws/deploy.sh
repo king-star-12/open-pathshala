@@ -69,14 +69,22 @@ else
 fi
 aws lambda wait function-active --region "$APP_REGION" --function-name "$FN"
 
-# ---- 5. Function URL (private, IAM auth) -----------------------------------
-echo "==> Function URL (AWS_IAM)"
-aws lambda create-function-url-config --region "$APP_REGION" --function-name "$FN" \
-  --auth-type AWS_IAM >/dev/null 2>&1 || \
-aws lambda update-function-url-config --region "$APP_REGION" --function-name "$FN" \
-  --auth-type AWS_IAM >/dev/null
-FU_HOST=$(aws lambda get-function-url-config --region "$APP_REGION" --function-name "$FN" \
-  --query FunctionUrl --output text | sed -E 's#https://([^/]+)/#\1#')
+# ---- 5. API Gateway HTTP API (public origin) -------------------------------
+echo "==> API Gateway HTTP API"
+LAMBDA_ARN="arn:aws:lambda:$APP_REGION:$ACCOUNT_ID:function:$FN"
+API_ID=$(aws apigatewayv2 get-apis --region "$APP_REGION" \
+  --query "Items[?Name=='openpathshala-http'].ApiId | [0]" --output text)
+if [ "$API_ID" = "None" ] || [ -z "$API_ID" ]; then
+  API_ID=$(aws apigatewayv2 create-api --region "$APP_REGION" --name openpathshala-http \
+    --protocol-type HTTP --target "$LAMBDA_ARN" --query ApiId --output text)
+fi
+# quick-create does NOT add the invoke permission — add it explicitly
+aws lambda add-permission --region "$APP_REGION" --function-name "$FN" \
+  --statement-id AllowAPIGWInvoke --action lambda:InvokeFunction \
+  --principal apigateway.amazonaws.com \
+  --source-arn "arn:aws:execute-api:$APP_REGION:$ACCOUNT_ID:$API_ID/*/*" >/dev/null 2>&1 || true
+FU_HOST=$(aws apigatewayv2 get-api --region "$APP_REGION" --api-id "$API_ID" \
+  --query ApiEndpoint --output text | sed -E 's#https://##')
 echo "    origin: $FU_HOST"
 
 # ---- 6. ACM cert (us-east-1, DNS validated) --------------------------------
@@ -96,16 +104,8 @@ if [ "$CERT_ARN" = "None" ] || [ -z "$CERT_ARN" ]; then
 fi
 echo "    cert: $CERT_ARN"
 
-# ---- 7. CloudFront OAC + distribution --------------------------------------
-echo "==> CloudFront OAC + distribution"
-OAC_ID=$(aws cloudfront list-origin-access-controls \
-  --query "OriginAccessControlList.Items[?Name=='openpathshala-lambda-oac'].Id | [0]" --output text)
-if [ "$OAC_ID" = "None" ] || [ -z "$OAC_ID" ]; then
-  OAC_ID=$(aws cloudfront create-origin-access-control --origin-access-control-config \
-    '{"Name":"openpathshala-lambda-oac","Description":"OAC for OpenPathshala","SigningProtocol":"sigv4","SigningBehavior":"always","OriginAccessControlOriginType":"lambda"}' \
-    --query "OriginAccessControl.Id" --output text)
-fi
-
+# ---- 7. CloudFront distribution (origin = API Gateway) ---------------------
+echo "==> CloudFront distribution"
 DIST_ID=$(aws cloudfront list-distributions \
   --query "DistributionList.Items[?contains(Aliases.Items, '$DOMAIN')].Id | [0]" --output text 2>/dev/null || echo "None")
 if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
@@ -117,12 +117,11 @@ if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
   "Comment": "OpenPathshala prototype",
   "Enabled": true, "HttpVersion": "http2and3", "IsIPV6Enabled": true,
   "Origins": {"Quantity": 1, "Items": [{
-    "Id": "lambda-openpathshala", "DomainName": "$FU_HOST",
-    "OriginAccessControlId": "$OAC_ID",
+    "Id": "apigw-openpathshala", "DomainName": "$FU_HOST",
     "CustomOriginConfig": {"HTTPPort":80,"HTTPSPort":443,"OriginProtocolPolicy":"https-only","OriginSslProtocols":{"Quantity":1,"Items":["TLSv1.2"]},"OriginReadTimeout":30,"OriginKeepaliveTimeout":5}
   }]},
   "DefaultCacheBehavior": {
-    "TargetOriginId": "lambda-openpathshala", "ViewerProtocolPolicy": "redirect-to-https",
+    "TargetOriginId": "apigw-openpathshala", "ViewerProtocolPolicy": "redirect-to-https",
     "AllowedMethods": {"Quantity":7,"Items":["GET","HEAD","OPTIONS","PUT","POST","PATCH","DELETE"],"CachedMethods":{"Quantity":2,"Items":["GET","HEAD"]}},
     "Compress": true,
     "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
@@ -133,20 +132,12 @@ if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
 }
 JSON
 )
-  read -r DIST_ID DIST_ARN < <(aws cloudfront create-distribution --distribution-config "$CFG" \
-    --query "Distribution.[Id,ARN]" --output text)
-else
-  DIST_ARN="arn:aws:cloudfront::$ACCOUNT_ID:distribution/$DIST_ID"
+  DIST_ID=$(aws cloudfront create-distribution --distribution-config "$CFG" \
+    --query "Distribution.Id" --output text)
 fi
 echo "    distribution: $DIST_ID"
 
-# ---- 8. allow this distribution to invoke the function URL ------------------
-aws lambda add-permission --region "$APP_REGION" --function-name "$FN" \
-  --statement-id AllowCloudFrontOAC --action lambda:InvokeFunctionUrl \
-  --principal cloudfront.amazonaws.com --source-arn "$DIST_ARN" \
-  --function-url-auth-type AWS_IAM >/dev/null 2>&1 || true
-
-# ---- 9. Route53 alias to CloudFront ----------------------------------------
+# ---- 8. Route53 alias to CloudFront ----------------------------------------
 echo "==> Route53 alias $DOMAIN -> CloudFront"
 CF_DOMAIN=$(aws cloudfront get-distribution --id "$DIST_ID" --query "Distribution.DomainName" --output text)
 aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch \
