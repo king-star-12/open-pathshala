@@ -97,6 +97,7 @@ app.post("/api/grade", rateLimit, async (req, res) => {
     const subject = cap(req.body?.subject, 60) || "Science";
     const question = cap(req.body?.question, 4000);
     const rubric = cap(req.body?.rubric, 4000);
+    const reference = cap(req.body?.reference, 6000);
     const answer = cap(req.body?.answer, 8000);
     const maxMarks = Math.min(100, Math.max(1, Number(req.body?.maxMarks) || 5));
     if (!question || !answer) {
@@ -105,7 +106,9 @@ app.post("/api/grade", rateLimit, async (req, res) => {
 
     const system =
       "You are an experienced, fair Indian school teacher grading a student's answer. " +
-      "You grade STRICTLY against the rubric/marking scheme provided. You are encouraging but honest. " +
+      "You grade STRICTLY against the rubric/marking scheme and the reference (model) answer when provided. " +
+      "Award marks for any correct idea that matches the reference answer even if worded differently; " +
+      "do not penalise wording or extra correct detail. You are encouraging but honest. " +
       "You return ONLY valid JSON. You never invent marks beyond the maximum. " +
       "If the answer is illegible or empty, say so and assign 0 with low confidence. " +
       "Feedback must be specific, kind, and point to the next learning step.";
@@ -117,6 +120,9 @@ ${question}
 
 MARKING SCHEME / RUBRIC (grade strictly against this; if none given, infer a reasonable one):
 ${rubric || "(none provided — infer a fair, standard marking scheme for this question)"}
+
+REFERENCE / MODEL ANSWER (the gold-standard answer; compare the student's answer against this for correctness):
+${reference || "(none provided — judge correctness on subject knowledge)"}
 
 STUDENT'S ANSWER:
 ${answer}
