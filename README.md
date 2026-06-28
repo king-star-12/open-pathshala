@@ -231,7 +231,7 @@ The processing core is **stateless and deployable three ways**: (a) **cloud** fo
 5. **Render** to print-ready PDF (with school header, instructions, marks in margins) **and** a separate answer key — in the chosen language, with a parallel translation if needed (Bhashini or model).
 6. **Anti-leakage & freshness.** Seeded variation so two sections get equivalent-but-different papers; a similarity check against previously generated papers to avoid repetition.
 
-**Scanned-textbook nuance:** Indian classrooms heavily use photocopied/scanned material. Robust ingest of *poor-quality scans* (skew, marginalia, bleed-through) is a genuine differentiator and a reusable OSS component on its own.
+**Scanned-textbook nuance:** Indian classrooms heavily use photocopied/scanned material. Robust ingest of *poor-quality scans* (skew, marginalia, bleed-through) is a genuine differentiator.
 
 ---
 
