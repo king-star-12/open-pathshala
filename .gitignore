@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+web/node_modules/
+
+# env / secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+aws-credentials*
+**/secrets*
+
+# logs
+*.log
+npm-debug.log*
+
+# os
+.DS_Store
+Thumbs.db
+
+# build artifacts
+dist/
+build/
+*.tgz
+
+# editor
+.vscode/
+.idea/
+
+# local launch config
+.claude/

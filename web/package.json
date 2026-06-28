@@ -1,0 +1,23 @@
+{
+  "name": "openpathshala-web",
+  "version": "0.1.0",
+  "description": "Reference prototype for OpenPathshala — an open-source AI workflow toolkit for Indian schools. Implements the 3-tier model router and the two MVP workflows (handwritten-answer grading + blueprint question-paper generation).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "serverless-http": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/king-star-12/open-pathshala"
+  }
+}

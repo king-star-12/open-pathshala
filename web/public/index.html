@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenPathshala — Open-source AI workflow toolkit for Indian schools</title>
+  <meta name="description" content="An offline-first, multilingual, open-source AI toolkit that returns hours to India's 1 crore teachers — grading, question-paper generation, and more, across the full spectrum of school infrastructure. Live demo powered by open LLMs." />
+  <meta property="og:title" content="OpenPathshala — AI workflow toolkit for Indian schools" />
+  <meta property="og:description" content="Offline-first, multilingual, Apache-2.0. Live prototype of AI grading + question-paper generation with a real 3-tier model router." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">📖</span>
+        <span class="brand-name">Open<b>Pathshala</b></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#problem">The problem</a>
+        <a href="#tiers">3 Indias</a>
+        <a href="#demo">Live demo</a>
+        <a href="#router">Model router</a>
+        <a href="#oss">Open source</a>
+        <a class="btn btn-ghost" href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">GitHub ★</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Apache-2.0 · Offline-first · Multilingual · Built on the public education commons</p>
+          <h1>Give India's <span class="hl">1 crore teachers</span> their hours back.</h1>
+          <p class="lede">
+            OpenPathshala is an open-source AI toolkit that automates the highest-friction classroom
+            workflows — grading handwritten answers, setting question papers, generating mother-tongue
+            notes — designed to run on <b>every</b> tier of Indian school infrastructure, from
+            no-electricity rural schools to fully-connected urban ones, at a cost of single-digit rupees per task.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#demo">Try the live demo ↓</a>
+            <a class="btn btn-ghost" href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">Read the architecture →</a>
+          </div>
+          <p class="hero-note">Live demo runs on open LLMs (Groq). The same router targets Claude in production.</p>
+        </div>
+        <div class="hero-stats" id="heroStats">
+          <div class="stat"><div class="stat-num" data-count="1471473">14.71 L</div><div class="stat-lbl">schools<br><small>UDISE+ 2024-25</small></div></div>
+          <div class="stat"><div class="stat-num">24.8 Cr</div><div class="stat-lbl">students enrolled</div></div>
+          <div class="stat"><div class="stat-num">1.01 Cr</div><div class="stat-lbl">teachers</div></div>
+          <div class="stat stat-warn"><div class="stat-num">36.5%</div><div class="stat-lbl">schools with <b>no internet</b></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM / DIGITAL DIVIDE -->
+    <section id="problem" class="section">
+      <div class="wrap">
+        <p class="kicker">The central design constraint</p>
+        <h2>One country, three completely different schools.</h2>
+        <p class="section-lede">
+          A national tool that assumes connectivity excludes the schools that need help most. Here's the
+          real infrastructure picture from <b>UDISE+ 2024-25</b> — the gap between "has electricity" and
+          "has working internet" is the whole problem.
+        </p>
+        <div class="bars" id="divideBars">
+          <!-- filled by app.js -->
+        </div>
+        <p class="source">Source: UDISE+ 2024-25, Ministry of Education, Govt. of India. Functional %, national average.</p>
+      </div>
+    </section>
+
+    <!-- THREE TIERS -->
+    <section id="tiers" class="section section-alt">
+      <div class="wrap">
+        <p class="kicker">Tiered degradation, not feature gating</p>
+        <h2>The same workflow runs everywhere — it just degrades gracefully.</h2>
+        <p class="section-lede">Premium schools don't get features poor schools are denied. Every tier gets the workflow; the model quality and latency adapt to what the school has.</p>
+        <div class="tier-grid">
+          <div class="tier-card">
+            <div class="tier-tag t0">T0</div>
+            <h3>No power · No internet</h3>
+            <p>Paper + a phone that's briefly charged. Capture now, queue, sync and process later. Fully on-device / edge open models — <b>zero recurring API cost.</b></p>
+            <ul>
+              <li>Photograph scripts when a device is free</li>
+              <li>Batch-grade overnight, print &amp; return</li>
+              <li>On-device OCR + small open LLM</li>
+            </ul>
+          </div>
+          <div class="tier-card tier-card-mid">
+            <div class="tier-tag t1">T1</div>
+            <h3>Shared devices · Intermittent net</h3>
+            <p>The majority of Indian schools. A single mini-PC at a Block Resource Centre serves a cluster. Open models do the bulk; a frontier model is reserved for hard judgment.</p>
+            <ul>
+              <li>Edge node syncs when online</li>
+              <li>Open-model transcription + selective escalation</li>
+              <li>Per-school budget caps</li>
+            </ul>
+          </div>
+          <div class="tier-card">
+            <div class="tier-tag t2">T2</div>
+            <h3>Connected · 1:1 or lab</h3>
+            <p>Funded / private schools. Full cloud routing — the value (teacher-hours returned) dwarfs the cost. Frontier vision + reasoning on every task.</p>
+            <ul>
+              <li>Real-time grading &amp; feedback</li>
+              <li>Misconception analytics for the class</li>
+              <li>DIKSHA / WhatsApp integrations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE DEMO -->
+    <section id="demo" class="section">
+      <div class="wrap">
+        <p class="kicker">Live prototype — really runs</p>
+        <h2>Try the two MVP workflows.</h2>
+        <p class="section-lede">
+          These call open LLMs server-side through the same <a href="#router">3-tier router</a> the
+          architecture specifies. Each result shows you which model tier handled it, the latency, and the
+          per-task cost. <b>Teacher-in-the-loop</b>: every output is a reviewable draft, never a final mark.
+        </p>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="grade" role="tab">📝 Grade an answer</button>
+          <button class="tab" data-tab="paper" role="tab">📄 Generate a question paper</button>
+          <button class="tab" data-tab="explain" role="tab">🌏 Mother-tongue explainer</button>
+        </div>
+
+        <!-- GRADE -->
+        <div class="panel active" data-panel="grade">
+          <div class="panel-grid">
+            <form class="form" id="form-grade">
+              <div class="row">
+                <label>Class <input name="grade" value="Class 8" /></label>
+                <label>Subject <input name="subject" value="Science" /></label>
+                <label>Max marks <input name="maxMarks" type="number" value="5" min="1" max="20" /></label>
+              </div>
+              <label>Question
+                <textarea name="question" rows="2">Why does a piece of sodium kept in the open catch fire? Explain.</textarea>
+              </label>
+              <label>Marking scheme / rubric <span class="opt">(optional)</span>
+                <textarea name="rubric" rows="3">1 mark: sodium is highly reactive. 2 marks: reacts with oxygen/moisture in air. 1 mark: reaction is exothermic / releases heat. 1 mark: heat ignites the sodium/hydrogen.</textarea>
+              </label>
+              <label>Student's answer <span class="opt">(type as a student would)</span>
+                <textarea name="answer" rows="4">Sodium is a very reactive metal. When we keep it in open air it reacts with the oxygen and moisture present in air. This reaction gives out lot of heat so it is exothermic. Because of this heat the sodium catches fire.</textarea>
+              </label>
+              <button class="btn btn-primary" type="submit">Grade this answer</button>
+            </form>
+            <div class="output" id="out-grade"><div class="output-empty">Results appear here →</div></div>
+          </div>
+        </div>
+
+        <!-- PAPER -->
+        <div class="panel" data-panel="paper">
+          <div class="panel-grid">
+            <form class="form" id="form-paper">
+              <div class="row">
+                <label>Board
+                  <select name="board"><option>CBSE</option><option>ICSE</option><option>Gujarat Board (GSEB)</option><option>Maharashtra Board</option><option>NIOS</option></select>
+                </label>
+                <label>Class <input name="grade" value="Class 10" /></label>
+              </div>
+              <div class="row">
+                <label>Subject <input name="subject" value="Science" /></label>
+                <label>Total marks <input name="totalMarks" type="number" value="20" min="5" max="80" /></label>
+              </div>
+              <label>Chapter <input name="chapter" value="Chemical Reactions and Equations" /></label>
+              <div class="row">
+                <label>Language
+                  <select name="language"><option>English</option><option>Hindi</option><option>Gujarati</option><option>Marathi</option><option>Tamil</option></select>
+                </label>
+                <label>Difficulty
+                  <select name="difficulty"><option>balanced</option><option>easy</option><option>hard</option></select>
+                </label>
+              </div>
+              <button class="btn btn-primary" type="submit">Generate paper + answer key</button>
+            </form>
+            <div class="output" id="out-paper"><div class="output-empty">A blueprint-compliant paper appears here →</div></div>
+          </div>
+        </div>
+
+        <!-- EXPLAIN -->
+        <div class="panel" data-panel="explain">
+          <div class="panel-grid">
+            <form class="form" id="form-explain">
+              <div class="row">
+                <label>Class <input name="grade" value="Class 6" /></label>
+                <label>Explain in
+                  <select name="language"><option>Hindi</option><option>Gujarati</option><option>Marathi</option><option>Tamil</option><option>Bengali</option><option>Kannada</option></select>
+                </label>
+              </div>
+              <label>Textbook passage
+                <textarea name="passage" rows="6">The process by which green plants make their own food using sunlight, water and carbon dioxide is called photosynthesis. It takes place in the green parts of the plant, mainly the leaves, which contain a green pigment called chlorophyll. Chlorophyll traps sunlight. Plants release oxygen during this process.</textarea>
+              </label>
+              <button class="btn btn-primary" type="submit">Explain in mother tongue</button>
+            </form>
+            <div class="output" id="out-explain"><div class="output-empty">A simplified, mother-tongue explainer appears here →</div></div>
+          </div>
+        </div>
+
+        <p class="demo-note">⚠️ Shared public demo — rate-limited and capped. Outputs are AI-generated drafts for demonstration; in a real deployment a teacher reviews and overrides every result.</p>
+      </div>
+    </section>
+
+    <!-- MODEL ROUTER -->
+    <section id="router" class="section section-alt">
+      <div class="wrap">
+        <p class="kicker">§7 of the spec — the most important cost decision</p>
+        <h2>Route by judgment required, not by default to the biggest model.</h2>
+        <p class="section-lede">Most classroom tasks are cheap extraction. A minority need reasoning. A small fraction need deep reasoning. Honest routing — a 70/20/10 split — cuts cost by more than half with negligible quality loss.</p>
+        <div class="router-grid" id="routerGrid"><!-- filled by app.js --></div>
+        <div class="router-levers">
+          <div class="lever"><b>Prompt caching</b><span>up to −90% on the rubric/blueprint reused across a whole class set</span></div>
+          <div class="lever"><b>Batch processing</b><span>−50% — grading &amp; overnight paper-gen aren't latency-sensitive</span></div>
+          <div class="lever"><b>Open-model floor</b><span>every step has an open-weights fallback — the toolkit never hard-locks to one vendor</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKFLOW CATALOGUE -->
+    <section id="catalogue" class="section">
+      <div class="wrap">
+        <p class="kicker">A toolkit, not a single app</p>
+        <h2>The workflow catalogue.</h2>
+        <p class="section-lede">Each module is chosen because it returns hours to a teacher — not because it's technically interesting. The two highlighted are the live MVP.</p>
+        <div class="cat-grid" id="catGrid"><!-- filled by app.js --></div>
+      </div>
+    </section>
+
+    <!-- OSS / CLAUDE FOR OSS -->
+    <section id="oss" class="section section-dark">
+      <div class="wrap oss-inner">
+        <div>
+          <p class="kicker light">Built in the open</p>
+          <h2>A genuine public good — Apache-2.0, built on the commons.</h2>
+          <p class="section-lede light">
+            OpenPathshala extends India's public education infrastructure — <b>DIKSHA / Sunbird</b>,
+            <b>Bhashini</b>, openly-licensed <b>NCERT</b> content — instead of rebuilding it. The toolkit
+            must run with <b>no paid API at all</b> (open models are the floor); frontier models like
+            Claude are the quality ceiling it routes to when a school can fund it.
+          </p>
+          <ul class="oss-points">
+            <li>✅ Permissive Apache-2.0 license — maximizes adoption &amp; dependency</li>
+            <li>✅ Provider-agnostic router — Groq / Ollama / vLLM / Claude</li>
+            <li>✅ DPDP-Act-aligned privacy: on-device redaction, consent ledger, teacher-in-the-loop</li>
+            <li>✅ Offline-first so it reaches the schools that need it most</li>
+          </ul>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">Star on GitHub ★</a>
+            <a class="btn btn-ghost light" href="https://claude.com/contact-sales/claude-for-oss" target="_blank" rel="noopener">Claude for OSS →</a>
+          </div>
+        </div>
+        <div class="oss-card">
+          <h4>The path to credibility</h4>
+          <p>Ship publicly → deploy to 5–10 real schools → measure teacher-hours saved &amp; grading accuracy → apply via the discretionary "ecosystem depends on it" path with evidence.</p>
+          <div class="roadmap">
+            <div class="rm"><span class="rm-p">P0</span> Grading engine + router</div>
+            <div class="rm"><span class="rm-p">P1</span> Question-paper generation <em>← MVP live now</em></div>
+            <div class="rm"><span class="rm-p">P2</span> Redaction + offline edge deploy</div>
+            <div class="rm"><span class="rm-p">P3</span> Multi-board + analytics</div>
+            <div class="rm"><span class="rm-p">P4</span> DIKSHA / UDISE / WhatsApp</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <span class="brand-name">Open<b>Pathshala</b></span>
+        <p>An open-source AI workflow toolkit for Indian schools. Architecture by Dhrumil · Clustral AI Labs. Released as an independent OSS public good.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">GitHub</a>
+        <a href="#demo">Live demo</a>
+        <a href="#problem">Research</a>
+        <span class="muted">Apache-2.0 · 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
