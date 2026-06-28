@@ -237,7 +237,57 @@ $("#form-explain").addEventListener("submit", async (e) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// "See it in action" animated showcase — tab switcher + captions + autoplay
+// ---------------------------------------------------------------------------
+const SCENE_CAPTIONS = {
+  scan: ['A1', 'Photograph a stack of scripts, AI transcribes the handwriting, grades each answer against the marking scheme, and flags low-confidence ones for the teacher.'],
+  photo: ['A1', 'Snap one answer on any phone — even offline. The image is graded against the answer key with per-criterion feedback in the student’s mother tongue.'],
+  paper: ['A2', 'Point it at an online or scanned textbook chapter. A server-side blueprint fixes the marks split; the AI fills it and writes a matching answer key.'],
+  proctor: ['New', 'A single camera watches the hall. AI tracks who is present and on-task and surfaces flags for the teacher to confirm — faces tokenised on-device, nothing uploaded.'],
+  attendance: ['D2', 'A photo of the paper register becomes a structured digital roster in seconds — no manual tallying, instant present/absent counts.'],
+  tutor: ['E4', 'A doubt-solving tutor that answers strictly from the prescribed textbook — citing the chapter, never guessing from the open web.'],
+};
+function initHowto() {
+  const tabs = $$('#howtoTabs .htab');
+  const scenes = $$('#howtoStage .scene');
+  const caption = $('#howtoCaption');
+  if (!tabs.length) return;
+  let timer;
+  const show = (name) => {
+    tabs.forEach((t) => t.classList.toggle('active', t.dataset.scene === name));
+    // toggle scene: removing/re-adding 'active' restarts the CSS animations
+    scenes.forEach((s) => {
+      const on = s.dataset.scene === name;
+      s.classList.remove('active');
+      if (on) { void s.offsetWidth; s.classList.add('active'); }
+    });
+    const c = SCENE_CAPTIONS[name];
+    if (c && caption) caption.innerHTML = `<span class="pill">${esc(c[0])}</span> ${esc(c[1])}`;
+  };
+  const order = tabs.map((t) => t.dataset.scene);
+  let idx = 0;
+  const autoplay = () => {
+    clearInterval(timer);
+    timer = setInterval(() => { idx = (idx + 1) % order.length; show(order[idx]); }, 7000);
+  };
+  tabs.forEach((t) =>
+    t.addEventListener('click', () => {
+      idx = order.indexOf(t.dataset.scene);
+      show(t.dataset.scene);
+      autoplay(); // reset the timer on manual interaction
+    })
+  );
+  // start autoplay only once the section scrolls into view
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => { if (e.isIntersecting) { autoplay(); } else { clearInterval(timer); } }),
+    { threshold: 0.25 }
+  );
+  io.observe($('#howto'));
+}
+
 // init
 renderBars();
 renderRouter();
 renderCatalogue();
+initHowto();

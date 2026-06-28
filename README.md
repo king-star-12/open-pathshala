@@ -6,7 +6,7 @@
 
 **Status:** Architecture / vision (v0.1)
 **License intent:** Apache-2.0 (code) + CC BY-SA-4.0 (content/curricula) — see §10
-**Author:** Dhrumil — Clustral AI Labs (architecture), released as an independent OSS public good
+**Architecture by:** Dhrumil Joshi and Rhythm Patel — released as an independent OSS public good
 
 > 🌐 **Live prototype:** https://pathshala.distillai.in — a working demo of the two MVP workflows (handwritten-answer grading & blueprint-constrained question-paper generation), powered by a real 3-tier model router (Groq LLMs). See [`/web`](./web).
 

@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/anim.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
@@ -24,6 +25,7 @@
       <nav class="nav-links">
         <a href="#problem">The problem</a>
         <a href="#tiers">3 Indias</a>
+        <a href="#howto">How it works</a>
         <a href="#demo">Live demo</a>
         <a href="#router">Model router</a>
         <a href="#oss">Open source</a>
@@ -115,6 +117,345 @@
             </ul>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS — ANIMATED -->
+    <section id="howto" class="section">
+      <div class="wrap">
+        <p class="kicker">See it in action</p>
+        <h2>How AI does the heavy lifting.</h2>
+        <p class="section-lede">Animated walkthroughs of the core workflows — from a phone photo of a handwritten script to a graded result, from a textbook to a ready exam paper, and a camera that watches an exam hall so a teacher doesn't have to.</p>
+
+        <div class="howto-tabs" id="howtoTabs">
+          <button class="htab active" data-scene="scan">① Scan &amp; compare</button>
+          <button class="htab" data-scene="photo">② Photo grading</button>
+          <button class="htab" data-scene="paper">③ Paper from textbook</button>
+          <button class="htab" data-scene="proctor">④ Live exam monitor</button>
+          <button class="htab" data-scene="attendance">⑤ Attendance</button>
+          <button class="htab" data-scene="tutor">⑥ Doubt tutor</button>
+        </div>
+
+        <div class="stage" id="howtoStage">
+
+          <!-- ① SCAN & COMPARE -->
+          <div class="scene active" data-scene="scan">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scan handwritten exam and compare to answer key">
+              <!-- student script -->
+              <text x="40" y="40" class="s-label">Handwritten answer script</text>
+              <g transform="translate(40,56)">
+                <rect width="190" height="240" rx="8" class="s-paper"/>
+                <path class="s-ink" d="M22 38 q20 -10 44 0 t44 0 t40 2"/>
+                <path class="s-ink" d="M22 72 q26 -8 52 0 t60 2"/>
+                <path class="s-ink" d="M22 106 q18 -10 40 0 t44 0 t46 2"/>
+                <path class="s-ink" d="M22 140 q24 -8 48 0 t52 2"/>
+                <path class="s-ink" d="M22 174 q20 -10 44 0 t40 2"/>
+                <path class="s-ink" d="M22 208 q26 -8 52 0 t40 2"/>
+                <!-- scan line -->
+                <rect class="anim a-scan" x="6" y="8" width="178" height="6" rx="3" fill="#e8722a" opacity="0"/>
+                <rect class="anim a-scan" x="6" y="8" width="178" height="40" rx="3" fill="url(#scanGlow)" opacity="0"/>
+              </g>
+
+              <!-- flow arrow -->
+              <path class="anim a-flow d2" d="M246 176 h60" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <!-- transcribed text -->
+              <text x="322" y="40" class="s-label">AI reads it (HTR)</text>
+              <g transform="translate(322,56)">
+                <rect width="170" height="240" rx="8" class="s-card"/>
+                <g class="anim a-type d2" style="--w:120px"><rect x="16" y="30" height="10" rx="3" fill="#cdd7ee"/></g>
+                <g class="anim a-type d3" style="--w:140px"><rect x="16" y="56" height="10" rx="3" fill="#cdd7ee"/></g>
+                <g class="anim a-type d4" style="--w:100px"><rect x="16" y="82" height="10" rx="3" fill="#cdd7ee"/></g>
+                <g class="anim a-type d5" style="--w:134px"><rect x="16" y="108" height="10" rx="3" fill="#9fb0d8"/></g>
+                <g class="anim a-type d6" style="--w:110px"><rect x="16" y="134" height="10" rx="3" fill="#9fb0d8"/></g>
+                <text x="16" y="184" class="s-label-sm">script-id: 0427 ·</text>
+                <text x="16" y="204" class="s-label-sm">lang: Devanagari</text>
+                <text x="16" y="224" class="s-label-sm">confidence: 0.93</text>
+              </g>
+
+              <path class="anim a-flow d3" d="M508 176 h52" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <!-- compare vs answer key -->
+              <text x="576" y="40" class="s-label">vs marking scheme</text>
+              <g transform="translate(576,56)">
+                <rect width="150" height="240" rx="8" class="s-card"/>
+                <g transform="translate(16,28)">
+                  <circle class="anim a-pop d3" cx="10" cy="6" r="11" fill="#2ea372"/>
+                  <path class="anim a-pop d3" d="M5 6 l3 4 l7 -8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                  <text x="30" y="10" class="s-mono">reactivity</text>
+                </g>
+                <g transform="translate(16,62)">
+                  <circle class="anim a-pop2 d4" cx="10" cy="6" r="11" fill="#2ea372"/>
+                  <path class="anim a-pop2 d4" d="M5 6 l3 4 l7 -8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                  <text x="30" y="10" class="s-mono">oxidation</text>
+                </g>
+                <g transform="translate(16,96)">
+                  <circle class="anim a-pop3 d5" cx="10" cy="6" r="11" fill="#e0654f"/>
+                  <path class="anim a-pop3 d5" d="M5 1 l10 10 M15 1 l-10 10" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+                  <text x="30" y="10" class="s-mono">exothermic</text>
+                </g>
+                <!-- score -->
+                <g class="anim a-count d6" transform="translate(75,180)" text-anchor="middle">
+                  <circle r="44" fill="#11301f" stroke="#2ea372" stroke-width="2"/>
+                  <text y="-2" class="s-green" style="font:700 30px Fraunces,serif">8/10</text>
+                  <text y="22" class="s-label-sm" text-anchor="middle">graded draft</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- ② PHOTO GRADING -->
+          <div class="scene" data-scene="photo">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Photograph an answer and grade against a key">
+              <text x="40" y="40" class="s-label">Snap a photo on any phone</text>
+              <!-- phone -->
+              <g class="anim a-shutter" transform="translate(70,58)" style="transform-origin:160px 150px">
+                <rect width="220" height="250" rx="22" fill="#0c1320" stroke="#33425f" stroke-width="2"/>
+                <rect x="14" y="36" width="192" height="178" rx="6" class="s-paper"/>
+                <path class="s-ink" d="M30 70 q22 -8 46 0 t60 2"/>
+                <path class="s-ink" d="M30 104 q18 -10 40 0 t52 2"/>
+                <path class="s-ink" d="M30 138 q24 -8 50 0 t46 2"/>
+                <path class="s-ink" d="M30 172 q20 -10 44 0 t40 2"/>
+                <circle cx="110" cy="234" r="11" fill="none" stroke="#7e8aa6" stroke-width="3"/>
+                <!-- camera flash -->
+                <rect class="anim a-flash" x="14" y="36" width="192" height="178" rx="6" fill="#fff"/>
+              </g>
+
+              <path class="anim a-flow d3" d="M306 184 h70" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <!-- result card -->
+              <text x="400" y="40" class="s-label">Instant graded feedback</text>
+              <g transform="translate(400,58)">
+                <rect width="320" height="250" rx="12" class="s-card"/>
+                <g class="anim a-count d3" transform="translate(58,70)" text-anchor="middle">
+                  <circle r="42" fill="#11301f" stroke="#2ea372" stroke-width="2"/>
+                  <text y="-2" class="s-green" style="font:700 26px Fraunces,serif">4/5</text>
+                  <text y="20" class="s-label-sm" text-anchor="middle">confidence 91%</text>
+                </g>
+                <g transform="translate(118,40)">
+                  <rect class="anim a-fade d3" width="180" height="26" rx="13" fill="#11301f"/>
+                  <text class="anim a-fade d3" x="14" y="17" class="s-mono" fill="#7ee0a8">✓ method correct</text>
+                  <rect class="anim a-fade d4" y="34" width="180" height="26" rx="13" fill="#11301f"/>
+                  <text class="anim a-fade d4" x="14" y="51" class="s-mono" fill="#7ee0a8">✓ units shown</text>
+                  <rect class="anim a-fade d5" y="68" width="180" height="26" rx="13" fill="#311a14"/>
+                  <text class="anim a-fade d5" x="14" y="85" class="s-mono" fill="#f0a08c">✗ final step missed</text>
+                </g>
+                <g class="anim a-fade d6" transform="translate(20,150)">
+                  <rect width="280" height="76" rx="10" fill="#101a2c" stroke="#2a3a58"/>
+                  <text x="14" y="24" class="s-label-sm" fill="#e8722a">मातृभाषा में फ़ीडबैक</text>
+                  <text x="14" y="46" class="s-mono" style="font-size:11px">अच्छा प्रयास! अगली बार अंतिम</text>
+                  <text x="14" y="62" class="s-mono" style="font-size:11px">चरण ज़रूर लिखें।</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- ③ PAPER FROM TEXTBOOK -->
+          <div class="scene" data-scene="paper">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generate a question paper from a textbook">
+              <text x="40" y="40" class="s-label">Textbook (online or scanned)</text>
+              <g transform="translate(48,60)">
+                <rect width="170" height="230" rx="6" fill="#23406b"/>
+                <rect x="10" y="10" width="150" height="210" rx="4" class="s-paper"/>
+                <text x="22" y="42" fill="#23406b" style="font:700 15px Fraunces,serif">Chapter 1</text>
+                <path class="s-ink-soft" d="M22 64 h120"/><path class="s-ink-soft" d="M22 84 h126"/>
+                <path class="s-ink-soft" d="M22 104 h110"/><path class="s-ink-soft" d="M22 124 h128"/>
+                <path class="s-ink-soft" d="M22 144 h100"/><path class="s-ink-soft" d="M22 164 h120"/>
+                <path class="s-ink-soft" d="M22 184 h94"/>
+                <rect class="anim a-scan" x="8" y="10" width="154" height="34" rx="3" fill="url(#scanGlow)" opacity="0"/>
+              </g>
+
+              <path class="anim a-flow d2" d="M232 175 h44" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <!-- blueprint bars -->
+              <text x="300" y="40" class="s-label">Blueprint constraints</text>
+              <g transform="translate(300,60)">
+                <rect width="170" height="230" rx="8" class="s-card"/>
+                <g transform="translate(28,200)">
+                  <rect class="anim a-grow d2" x="0" y="-60" width="26" height="60" rx="4" fill="#2ea372"/>
+                  <rect class="anim a-grow d3" x="42" y="-110" width="26" height="110" rx="4" fill="#d98a1f"/>
+                  <rect class="anim a-grow d4" x="84" y="-150" width="26" height="150" rx="4" fill="#2b6cb0"/>
+                  <text x="13" y="20" class="s-label-sm" text-anchor="middle">MCQ</text>
+                  <text x="55" y="20" class="s-label-sm" text-anchor="middle">Short</text>
+                  <text x="97" y="20" class="s-label-sm" text-anchor="middle">Long</text>
+                </g>
+                <text x="20" y="40" class="s-label-sm">Σ = 20 marks · Bloom-spread</text>
+              </g>
+
+              <path class="anim a-flow d4" d="M486 175 h44" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <!-- assembled paper -->
+              <text x="556" y="40" class="s-label">Ready paper + key</text>
+              <g transform="translate(556,60)">
+                <rect width="166" height="230" rx="6" class="s-paper"/>
+                <text x="83" y="30" text-anchor="middle" fill="#23406b" style="font:700 12px Fraunces,serif">QUESTION PAPER</text>
+                <g class="anim a-fade d4"><rect x="16" y="48" width="14" height="8" rx="2" class="s-accent"/><path class="s-ink-soft" d="M38 53 h108"/></g>
+                <g class="anim a-fade d5"><rect x="16" y="74" width="14" height="8" rx="2" class="s-accent"/><path class="s-ink-soft" d="M38 79 h96"/></g>
+                <g class="anim a-fade d5"><path class="s-ink-soft" d="M38 98 h112"/></g>
+                <g class="anim a-fade d6"><rect x="16" y="118" width="14" height="8" rx="2" class="s-accent"/><path class="s-ink-soft" d="M38 123 h104"/></g>
+                <g class="anim a-fade d6"><path class="s-ink-soft" d="M38 142 h120"/></g>
+                <g class="anim a-count d6" transform="translate(83,188)" text-anchor="middle">
+                  <rect x="-52" y="-18" width="104" height="34" rx="17" fill="#11301f" stroke="#2ea372"/>
+                  <text y="5" class="s-green" style="font:700 14px Inter,sans-serif">20 marks ✓</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- ④ LIVE EXAM MONITOR -->
+          <div class="scene" data-scene="proctor">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Monitor an exam hall via live camera with AI">
+              <text x="40" y="40" class="s-label">Live camera · exam hall</text>
+              <text x="540" y="40" class="s-red anim a-pulse" style="font:600 13px Inter">● REC</text>
+              <g transform="translate(40,56)">
+                <rect width="480" height="270" rx="10" fill="#0a1018" stroke="#33425f" stroke-width="2"/>
+                <!-- scanning line -->
+                <rect class="anim a-dash" x="10" y="135" width="460" height="2" fill="none" stroke="#2ea372"/>
+                <!-- seats with bounding boxes -->
+                <g font-family="Inter">
+                  <!-- row of students = head+shoulders glyphs -->
+                  <g transform="translate(40,60)">
+                    <circle cx="30" cy="20" r="16" fill="#2f3e5e"/><path d="M6 64 a24 24 0 0 1 48 0z" fill="#2f3e5e"/>
+                    <rect class="anim a-box d1" x="0" y="0" width="60" height="70" rx="6" fill="none" stroke="#2ea372" stroke-width="2"/>
+                  </g>
+                  <g transform="translate(160,60)">
+                    <circle cx="30" cy="20" r="16" fill="#2f3e5e"/><path d="M6 64 a24 24 0 0 1 48 0z" fill="#2f3e5e"/>
+                    <rect class="anim a-box d2" x="0" y="0" width="60" height="70" rx="6" fill="none" stroke="#2ea372" stroke-width="2"/>
+                  </g>
+                  <!-- flagged student -->
+                  <g transform="translate(280,60)">
+                    <circle cx="38" cy="20" r="16" fill="#3a2218"/><path d="M14 64 a24 24 0 0 1 48 0z" fill="#3a2218"/>
+                    <rect class="anim a-box d3" x="0" y="0" width="76" height="70" rx="6" fill="none" stroke="#e0654f" stroke-width="2.4"/>
+                    <g class="anim a-alert" transform="translate(38,-14)">
+                      <path d="M0 -12 L12 10 L-12 10 Z" fill="#e0654f"/>
+                      <text y="7" text-anchor="middle" fill="#fff" style="font:700 12px Inter">!</text>
+                    </g>
+                  </g>
+                  <g transform="translate(400,60)">
+                    <circle cx="30" cy="20" r="16" fill="#2f3e5e"/><path d="M6 64 a24 24 0 0 1 48 0z" fill="#2f3e5e"/>
+                    <rect class="anim a-box d4" x="0" y="0" width="60" height="70" rx="6" fill="none" stroke="#2ea372" stroke-width="2"/>
+                  </g>
+                  <g transform="translate(100,160)">
+                    <circle cx="30" cy="20" r="16" fill="#2f3e5e"/><path d="M6 64 a24 24 0 0 1 48 0z" fill="#2f3e5e"/>
+                    <rect class="anim a-box d2" x="0" y="0" width="60" height="70" rx="6" fill="none" stroke="#2ea372" stroke-width="2"/>
+                  </g>
+                  <g transform="translate(320,160)">
+                    <circle cx="30" cy="20" r="16" fill="#2f3e5e"/><path d="M6 64 a24 24 0 0 1 48 0z" fill="#2f3e5e"/>
+                    <rect class="anim a-box d4" x="0" y="0" width="60" height="70" rx="6" fill="none" stroke="#2ea372" stroke-width="2"/>
+                  </g>
+                </g>
+              </g>
+
+              <!-- status panel -->
+              <g transform="translate(540,56)">
+                <rect width="184" height="270" rx="10" class="s-card"/>
+                <text x="16" y="30" class="s-label">AI proctor</text>
+                <g class="anim a-fade d2"><circle cx="22" cy="58" r="5" class="s-green"/><text x="36" y="62" class="s-mono">24 present</text></g>
+                <g class="anim a-fade d3"><circle cx="22" cy="86" r="5" class="s-green"/><text x="36" y="90" class="s-mono">22 on-task</text></g>
+                <g class="anim a-alert"><rect x="14" y="108" width="156" height="44" rx="8" fill="#311a14" stroke="#e0654f"/>
+                  <text x="24" y="128" class="s-mono" fill="#f0a08c" style="font-size:12px">⚠ seat C3</text>
+                  <text x="24" y="144" class="s-label-sm" fill="#f0a08c">looking at neighbour</text>
+                </g>
+                <g class="anim a-fade d5"><text x="16" y="186" class="s-label-sm">Privacy: faces tokenised</text>
+                  <text x="16" y="206" class="s-label-sm">on-device · no cloud upload</text>
+                  <text x="16" y="226" class="s-label-sm">teacher confirms every flag</text>
+                </g>
+                <g class="anim a-fade d6"><rect x="14" y="240" width="156" height="14" rx="7" fill="#101a2c"/><rect x="14" y="240" width="120" height="14" rx="7" class="s-green"/></g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- ⑤ ATTENDANCE -->
+          <div class="scene" data-scene="attendance">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Digitise a paper attendance register">
+              <text x="40" y="40" class="s-label">Photo of paper register</text>
+              <g transform="translate(48,58)">
+                <rect width="300" height="252" rx="8" class="s-paper"/>
+                <path d="M48 0 V252 M0 44 H300" stroke="#d9cdb6" stroke-width="2"/>
+                <text x="14" y="30" fill="#23406b" style="font:700 12px Inter">#</text>
+                <text x="70" y="30" fill="#23406b" style="font:700 12px Inter">Name</text>
+                <text x="250" y="30" fill="#23406b" style="font:700 12px Inter">P/A</text>
+                <g font-family="JetBrains Mono" font-size="12" fill="#2b3a67">
+                  <text x="16" y="74">1</text><path class="s-ink-soft" d="M64 70 h150"/><text x="248" y="74" class="s-green">✓</text>
+                  <text x="16" y="106">2</text><path class="s-ink-soft" d="M64 102 h140"/><text x="248" y="106" class="s-green">✓</text>
+                  <text x="16" y="138">3</text><path class="s-ink-soft" d="M64 134 h150"/><text x="248" y="138" class="s-red">✗</text>
+                  <text x="16" y="170">4</text><path class="s-ink-soft" d="M64 166 h130"/><text x="248" y="170" class="s-green">✓</text>
+                  <text x="16" y="202">5</text><path class="s-ink-soft" d="M64 198 h148"/><text x="248" y="202" class="s-green">✓</text>
+                </g>
+                <rect class="anim a-scan" x="6" y="44" width="288" height="34" rx="3" fill="url(#scanGlow)" opacity="0" style="animation-name:scanSweep"/>
+              </g>
+
+              <path class="anim a-flow d3" d="M362 184 h54" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+              <text x="440" y="40" class="s-label">Structured digital roster</text>
+              <g transform="translate(440,58)">
+                <rect width="280" height="252" rx="10" class="s-card"/>
+                <g transform="translate(20,30)">
+                  <g class="anim a-fade d3"><rect width="240" height="30" rx="6" fill="#101a2c"/><text x="12" y="20" class="s-mono">Aarav S.</text><circle cx="220" cy="15" r="8" class="s-green"/></g>
+                  <g class="anim a-fade d4" transform="translate(0,38)"><rect width="240" height="30" rx="6" fill="#101a2c"/><text x="12" y="20" class="s-mono">Diya P.</text><circle cx="220" cy="15" r="8" class="s-green"/></g>
+                  <g class="anim a-fade d5" transform="translate(0,76)"><rect width="240" height="30" rx="6" fill="#1a0f0c"/><text x="12" y="20" class="s-mono" fill="#f0a08c">Kabir M.</text><circle cx="220" cy="15" r="8" class="s-red"/></g>
+                  <g class="anim a-fade d6" transform="translate(0,114)"><rect width="240" height="30" rx="6" fill="#101a2c"/><text x="12" y="20" class="s-mono">Meera J.</text><circle cx="220" cy="15" r="8" class="s-green"/></g>
+                </g>
+                <g class="anim a-count d6" transform="translate(140,222)" text-anchor="middle">
+                  <rect x="-70" y="-18" width="140" height="34" rx="17" fill="#11301f" stroke="#2ea372"/>
+                  <text y="5" class="s-green" style="font:700 14px Inter">Present 38 / 40</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- ⑥ DOUBT TUTOR -->
+          <div class="scene" data-scene="tutor">
+            <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Textbook-grounded doubt-solving tutor">
+              <text x="40" y="40" class="s-label">After-hours doubt — grounded strictly in the textbook</text>
+              <!-- student bubble -->
+              <g class="anim a-bubble d1" transform="translate(40,60)">
+                <rect width="300" height="56" rx="14" fill="#23344f"/>
+                <text x="18" y="26" class="s-mono" style="font-size:13px">Why is the sky blue, didi?</text>
+                <text x="18" y="46" class="s-label-sm">— student, Class 7</text>
+              </g>
+              <!-- typing dots -->
+              <g class="anim a-bubble d2" transform="translate(560,140)">
+                <rect width="160" height="44" rx="14" fill="#11301f"/>
+                <circle class="anim a-pulse" cx="40" cy="22" r="5" class="s-green"/>
+                <circle class="anim a-pulse d2" cx="60" cy="22" r="5" class="s-green"/>
+                <circle class="anim a-pulse d3" cx="80" cy="22" r="5" class="s-green"/>
+                <text x="100" y="27" class="s-label-sm">thinking…</text>
+              </g>
+              <!-- AI answer bubble -->
+              <g class="anim a-bubble d4" transform="translate(300,200)">
+                <rect width="420" height="120" rx="14" fill="#11301f" stroke="#2ea372"/>
+                <text x="18" y="30" fill="#7ee0a8" style="font:600 13px Inter">AI tutor</text>
+                <text x="18" y="56" class="s-mono" style="font-size:12.5px">Sunlight scatters off tiny air particles.</text>
+                <text x="18" y="76" class="s-mono" style="font-size:12.5px">Blue light scatters most — so the sky</text>
+                <text x="18" y="96" class="s-mono" style="font-size:12.5px">looks blue. (Class 7 Science, Ch. 11)</text>
+              </g>
+              <!-- grounding chip -->
+              <g class="anim a-fade d5" transform="translate(40,150)">
+                <rect width="220" height="120" rx="10" class="s-card"/>
+                <text x="16" y="28" class="s-label">📗 Grounded source</text>
+                <path class="s-ink-soft" d="M16 50 h150"/><path class="s-ink-soft" d="M16 70 h170"/>
+                <path class="s-ink-soft" d="M16 90 h140"/>
+                <text x="16" y="112" class="s-label-sm" fill="#2ea372">no open-web guessing</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- shared SVG defs -->
+          <svg width="0" height="0" aria-hidden="true">
+            <defs>
+              <linearGradient id="scanGlow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e8722a" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#e8722a" stop-opacity="0.45"/>
+              </linearGradient>
+              <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                <path d="M0 0 L9 4.5 L0 9 z" fill="#e8722a"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="stage-caption" id="howtoCaption"><span class="pill">A1</span> Photograph a stack of scripts, AI transcribes the handwriting, grades each answer against the marking scheme, and flags low-confidence ones for the teacher.</div>
       </div>
     </section>
 
@@ -256,7 +597,6 @@
           </ul>
           <div class="hero-cta">
             <a class="btn btn-primary" href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">Star on GitHub ★</a>
-            <a class="btn btn-ghost light" href="https://claude.com/contact-sales/claude-for-oss" target="_blank" rel="noopener">Claude for OSS →</a>
           </div>
         </div>
         <div class="oss-card">
@@ -278,7 +618,7 @@
     <div class="wrap footer-inner">
       <div>
         <span class="brand-name">Open<b>Pathshala</b></span>
-        <p>An open-source AI workflow toolkit for Indian schools. Architecture by Dhrumil · Clustral AI Labs. Released as an independent OSS public good.</p>
+        <p>An open-source AI workflow toolkit for Indian schools. Architecture by Dhrumil Joshi and Rhythm Patel. Released as an independent OSS public good.</p>
       </div>
       <div class="footer-links">
         <a href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">GitHub</a>
