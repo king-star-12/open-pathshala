@@ -412,5 +412,5 @@ The hosted prototype runs on **AWS App Runner** behind **`pathshala.distillai.in
 - **NEP 2020** — four-stage structure; mother-tongue instruction; clauses 2.60 & 23.60 (DIKSHA as national repository).
 - **DPDP Act, 2023** — personal-data protection; children's-data safeguards.
 - **Claude API pricing** — Haiku 4.5 \$1/\$5, Sonnet 4.6 \$3/\$15, Opus 4.8 \$5/\$25 per MTok; batch −50%; caching up to −90% (claude.com/pricing, June 2026).
-
+- Market research by Rhythm Patel and Dhrumil Joshi
 *All statistics are dated; verify against the latest official releases before publication, as UDISE+ updates annually and API pricing can change.*
