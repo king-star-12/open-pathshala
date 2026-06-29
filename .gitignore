@@ -9,7 +9,10 @@ web/node_modules/
 *.pem
 *.key
 aws-credentials*
-**/secrets*
+# secret *files* (not the secrets.js source module, which contains no secrets)
+**/secrets.json
+**/*.secret
+secrets/
 
 # logs
 *.log

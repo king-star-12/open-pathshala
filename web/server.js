@@ -16,13 +16,14 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { complete, routerInfo, hasApiKey, estimateTokens, estimateCostUSD } from "./lib/router.js";
+import { complete, routerInfo, hasApiKey, hasAzure } from "./lib/router.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(express.json({ limit: "256kb" }));
+// 6mb to accept a downscaled camera/scan image (data URL) for OCR + proctoring.
+app.use(express.json({ limit: "6mb" }));
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -60,6 +61,11 @@ setInterval(() => {
 }, 5 * RL_WINDOW_MS).unref();
 
 const cap = (s, n) => (typeof s === "string" ? s.slice(0, n) : "");
+// Pick the provider for a request: "azure" (enterprise APIM LB) when asked AND
+// configured, else the open Groq floor.
+const pickProvider = (b) => (b?.provider === "azure" && hasAzure() ? "azure" : "groq");
+// Accept a data-URL image and cap its size (defence in depth atop the body limit).
+const capImage = (s) => (typeof s === "string" && /^data:image\//.test(s) ? s.slice(0, 7_000_000) : null);
 
 // Deterministic blueprint that provably sums to `total`: long (5m) ~half the
 // paper, then short (3m), then MCQ (1m) for the remainder. Bloom levels spread
@@ -139,7 +145,7 @@ Return JSON with EXACTLY this shape:
   "teacher_flag": "<'review' if confidence < 0.6 or answer is ambiguous/illegible, else 'ok'>"
 }`;
 
-    const out = await complete({ tier: "reasoning", system, user, temperature: 0.2, maxTokens: 1200, json: true });
+    const out = await complete({ provider: pickProvider(req.body), tier: "reasoning", system, user, temperature: 0.2, maxTokens: 1200, json: true });
     let parsed;
     try {
       parsed = JSON.parse(out.text);
@@ -194,7 +200,7 @@ Return JSON with EXACTLY this shape:
   "total": ${totalMarks}
 }`;
 
-    const out = await complete({ tier: "reasoning", system, user, temperature: 0.45, maxTokens: 2800, json: true });
+    const out = await complete({ provider: pickProvider(req.body), tier: "reasoning", system, user, temperature: 0.45, maxTokens: 2800, json: true });
     let parsed;
     try {
       parsed = JSON.parse(out.text);
@@ -245,7 +251,7 @@ Return JSON:
   "check_questions": ["<2 simple questions in ${language} to check understanding>"]
 }`;
 
-    const out = await complete({ tier: "reasoning", system, user, temperature: 0.5, maxTokens: 1200, json: true });
+    const out = await complete({ provider: pickProvider(req.body), tier: "reasoning", system, user, temperature: 0.5, maxTokens: 1200, json: true });
     let parsed;
     try {
       parsed = JSON.parse(out.text);
@@ -260,9 +266,11 @@ Return JSON:
 
 function routeMeta(out) {
   return {
+    provider: out.provider,
     model: out.model,
     tier: out.tier,
     analogue: out.analogue,
+    backend: out.backend, // which Azure region/backend served it (LB visibility)
     latencyMs: out.latencyMs,
     promptTokens: out.usage?.prompt_tokens,
     completionTokens: out.usage?.completion_tokens,
@@ -271,9 +279,101 @@ function routeMeta(out) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Module A1 (vision) — OCR + grade a photographed/scanned handwritten answer
+// ---------------------------------------------------------------------------
+app.post("/api/ocr-grade", rateLimit, async (req, res) => {
+  try {
+    const image = capImage(req.body?.image);
+    if (!image) return res.status(400).json({ error: "Provide an image (data URL) of the handwritten answer." });
+    const grade = cap(req.body?.grade, 40) || "Class 8";
+    const subject = cap(req.body?.subject, 60) || "Science";
+    const question = cap(req.body?.question, 4000);
+    const rubric = cap(req.body?.rubric, 4000);
+    const reference = cap(req.body?.reference, 6000);
+    const maxMarks = Math.min(100, Math.max(1, Number(req.body?.maxMarks) || 5));
+
+    const system =
+      "You are an expert Indian school teacher with excellent handwriting recognition. " +
+      "First TRANSCRIBE the student's handwritten answer from the image (handle Indian-language and English " +
+      "handwriting; mark anything unreadable as [illegible]). Then GRADE it strictly against the rubric and " +
+      "reference answer, crediting correct ideas regardless of wording. Return ONLY valid JSON. " +
+      "If the page is blank or unreadable, say so with low confidence.";
+
+    const user = `Transcribe and grade this ${grade} ${subject} handwritten answer out of ${maxMarks} marks.
+
+QUESTION:
+${question || "(infer from the page if not given)"}
+
+RUBRIC / MARKING SCHEME:
+${rubric || "(infer a fair standard scheme)"}
+
+REFERENCE / MODEL ANSWER:
+${reference || "(judge on subject knowledge)"}
+
+Return JSON EXACTLY:
+{
+  "transcription": "<your best transcription of the handwriting>",
+  "ocr_confidence": <0..1>,
+  "awarded": <0..${maxMarks}>,
+  "maxMarks": ${maxMarks},
+  "confidence": <0..1>,
+  "criteria": [ { "point": "<expected idea>", "marks": <n>, "got": <true|false>, "note": "<short>" } ],
+  "feedback_en": "<2-3 sentences>",
+  "feedback_local": "<same in simple Hindi>",
+  "teacher_flag": "<'review' if low confidence/illegible else 'ok'>"
+}`;
+
+    // Vision => use the configured provider's vision model (Azure GPT-5-mini by
+    // default for enterprise; Groq Llama-4-Scout for the open floor).
+    const provider = req.body?.provider === "groq" ? "groq" : (hasAzure() ? "azure" : "groq");
+    const out = await complete({ provider, tier: "reasoning", system, user, images: [image], maxTokens: 1500, json: true });
+    let parsed; try { parsed = JSON.parse(out.text); } catch { parsed = { raw: out.text }; }
+    res.json({ result: parsed, meta: routeMeta(out) });
+  } catch (err) {
+    sendLLMError(res, err);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Module (new) — Live exam proctoring: analyse a camera frame for integrity
+// ---------------------------------------------------------------------------
+app.post("/api/proctor", rateLimit, async (req, res) => {
+  try {
+    const image = capImage(req.body?.image);
+    if (!image) return res.status(400).json({ error: "Provide a camera frame (data URL)." });
+
+    const system =
+      "You are an AI exam-proctoring assistant analysing ONE webcam frame of a student taking an exam. " +
+      "You assist a human invigilator — you never accuse, you only surface observations for human review. " +
+      "Be calm and avoid false alarms. Return ONLY valid JSON.";
+
+    const user = `Analyse this exam webcam frame. Report what you observe.
+
+Return JSON EXACTLY:
+{
+  "students_visible": <integer count of people>,
+  "candidate_present": <true|false>,
+  "gaze": "<'on-paper' | 'on-screen' | 'looking-away' | 'unknown'>",
+  "phone_detected": <true|false>,
+  "extra_person": <true|false>,
+  "integrity": "<'ok' | 'attention' | 'flag'>",
+  "observations": ["<short neutral observation>", "..."],
+  "note_for_invigilator": "<one short line; empty if all clear>"
+}`;
+
+    const provider = req.body?.provider === "groq" ? "groq" : (hasAzure() ? "azure" : "groq");
+    const out = await complete({ provider, tier: "cheap", system, user, images: [image], maxTokens: 700, json: true });
+    let parsed; try { parsed = JSON.parse(out.text); } catch { parsed = { raw: out.text }; }
+    res.json({ result: parsed, meta: routeMeta(out) });
+  } catch (err) {
+    sendLLMError(res, err);
+  }
+});
+
 // --- meta endpoints ---------------------------------------------------------
 app.get("/api/router", (_req, res) => res.json(routerInfo()));
-app.get("/healthz", (_req, res) => res.json({ ok: true, llm: hasApiKey() }));
+app.get("/healthz", (_req, res) => res.json({ ok: true, llm: hasApiKey(), azure: hasAzure() }));
 
 // --- static site ------------------------------------------------------------
 app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));

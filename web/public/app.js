@@ -112,9 +112,11 @@ $$(".tab").forEach((tab) => {
 // ---------------------------------------------------------------------------
 // Demo plumbing
 // ---------------------------------------------------------------------------
+let PROVIDER = "groq"; // toggled by the provider switch
 function formData(form) {
   const o = {};
   new FormData(form).forEach((v, k) => (o[k] = v));
+  o.provider = PROVIDER;
   return o;
 }
 function loading(host) {
@@ -125,12 +127,19 @@ function showError(host, msg) {
 }
 function metaBar(meta) {
   if (!meta) return "";
+  const prov = meta.provider === "azure"
+    ? `<span class="chip" style="background:#e8f0fe;border-color:#b6d0fb;color:#2b6cb0">plane: <b>Azure · APIM LB</b></span>`
+    : `<span class="chip" style="background:#eef7f0;border-color:#bfe0cc;color:#1f7a52">plane: <b>Open · Groq</b></span>`;
+  const backend = meta.backend
+    ? `<span class="chip">region: <b>${esc((meta.backend.match(/op-aoai-(\w+)/) || [, meta.backend])[1])}</b></span>`
+    : "";
   return `<div class="meta-bar">
+    ${prov}
     <span class="chip chip-tier">tier: <b>${esc(meta.tier)}</b> (${esc(meta.analogue || "")})</span>
     <span class="chip">model: <b>${esc(meta.model)}</b></span>
+    ${backend}
     <span class="chip">⏱ <b>${(meta.latencyMs / 1000).toFixed(1)}s</b></span>
-    <span class="chip">tokens: <b>${(meta.promptTokens || 0) + (meta.completionTokens || 0)}</b></span>
-    <span class="chip chip-cost">≈ <b>₹${meta.costINR}</b> ($${meta.costUSD})</span>
+    <span class="chip chip-cost">≈ <b>₹${meta.costINR}</b></span>
   </div>`;
 }
 async function callApi(path, body) {
@@ -286,8 +295,175 @@ function initHowto() {
   io.observe($('#howto'));
 }
 
+// ---------------------------------------------------------------------------
+// Provider switch (Open Groq vs Enterprise Azure LB)
+// ---------------------------------------------------------------------------
+function initProviderSwitch() {
+  const opts = $$("#providerSwitch .ps-opt");
+  if (!opts.length) return;
+  // disable Azure if the server reports it isn't configured
+  fetch("/api/router").then((r) => r.json()).then((info) => {
+    if (!info.azureEnabled) {
+      const az = opts.find((o) => o.dataset.provider === "azure");
+      if (az) { az.disabled = true; az.style.opacity = .5; az.title = "Enterprise plane not configured on this server"; }
+    }
+  }).catch(() => {});
+  opts.forEach((o) =>
+    o.addEventListener("click", () => {
+      if (o.disabled) return;
+      PROVIDER = o.dataset.provider;
+      opts.forEach((x) => x.classList.toggle("active", x === o));
+    })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Image helpers — downscale a File/video frame to a compact JPEG data URL
+// ---------------------------------------------------------------------------
+function canvasToDataURL(source, w, h, max = 1024) {
+  const scale = Math.min(1, max / Math.max(w, h));
+  const cw = Math.round(w * scale), ch = Math.round(h * scale);
+  const c = document.createElement("canvas");
+  c.width = cw; c.height = ch;
+  c.getContext("2d").drawImage(source, 0, 0, cw, ch);
+  return c.toDataURL("image/jpeg", 0.72);
+}
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(canvasToDataURL(img, img.naturalWidth, img.naturalHeight));
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Vision tabs
+// ---------------------------------------------------------------------------
+function initVisionTabs() {
+  $$("[data-vtab]").forEach((tab) =>
+    tab.addEventListener("click", () => {
+      $$("[data-vtab]").forEach((t) => t.classList.remove("active"));
+      $$("[data-vpanel]").forEach((p) => p.classList.remove("active"));
+      tab.classList.add("active");
+      $(`[data-vpanel="${tab.dataset.vtab}"]`).classList.add("active");
+    })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// OCR — scan & grade a handwritten answer (vision)
+// ---------------------------------------------------------------------------
+function initOCR() {
+  const form = $("#form-ocr"); if (!form) return;
+  const file = $("#ocrFile"), preview = $("#ocrPreview"), hint = $("#ocrHint"),
+        cam = $("#ocrCam"), zone = $("#ocrDrop"), go = $("#ocrGo");
+  let dataUrl = null, stream = null;
+
+  const setImage = (url) => {
+    dataUrl = url; stopCam();
+    preview.src = url; preview.hidden = false; cam.hidden = true; hint.hidden = true;
+    zone.classList.add("has-img"); go.disabled = false;
+  };
+  const stopCam = () => { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } cam.hidden = true; };
+
+  $("#ocrPick").addEventListener("click", () => file.click());
+  file.addEventListener("change", async () => { if (file.files[0]) setImage(await fileToDataURL(file.files[0])); });
+
+  $("#ocrCamBtn").addEventListener("click", async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      cam.srcObject = stream; await cam.play();
+      preview.hidden = true; hint.hidden = true; cam.hidden = false; zone.classList.add("has-img");
+      go.disabled = false; go.textContent = "📸 Capture & grade";
+    } catch (e) { alert("Camera unavailable: " + e.message); }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (stream) { dataUrl = canvasToDataURL(cam, cam.videoWidth, cam.videoHeight); setImage(dataUrl); go.textContent = "Scan & grade"; }
+    if (!dataUrl) return;
+    const host = $("#out-ocr"); loading(host);
+    try {
+      const fd = formData(form); delete fd.provider; // OCR defaults to enterprise vision
+      const { result: r, meta } = await callApi("/api/ocr-grade", { ...fd, image: dataUrl, provider: PROVIDER });
+      if (r.raw) return (host.innerHTML = metaBar(meta) + `<pre>${esc(r.raw)}</pre>`);
+      const pct = r.maxMarks ? Math.round((r.awarded / r.maxMarks) * 100) : 0;
+      const crits = (r.criteria || []).map((c) => `<div class="crit"><span class="${c.got ? "ok" : "no"}">${c.got ? "✓" : "✗"}</span><span>${esc(c.point)}<br><span class="cm">${esc(c.note || "")}</span></span><span class="q-m">${esc(c.marks)} m</span></div>`).join("");
+      host.innerHTML = metaBar(meta) +
+        `<h5 style="margin:.2rem 0 .3rem;text-transform:uppercase;font-size:.72rem;letter-spacing:.05em;color:var(--muted)">OCR transcription · confidence ${Math.round((r.ocr_confidence || 0) * 100)}%</h5>
+         <div class="ocr-trans">${esc(r.transcription || "")}</div>
+         <div style="display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap">
+           <div class="score-big">${esc(r.awarded)}<small>/${esc(r.maxMarks)} (${pct}%)</small></div>
+           ${r.teacher_flag === "review" ? `<span class="flag-review">⚑ Needs teacher review</span>` : ""}
+         </div>
+         <div style="margin-top:.8rem">${crits}</div>
+         ${r.feedback_en ? `<div class="fb"><h5>Feedback</h5>${esc(r.feedback_en)}</div>` : ""}
+         ${r.feedback_local ? `<div class="fb"><h5>Mother tongue</h5>${esc(r.feedback_local)}</div>` : ""}`;
+    } catch (err) { showError(host, err.message); }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Live exam proctor — webcam frames -> integrity analysis
+// ---------------------------------------------------------------------------
+function initProctor() {
+  const cam = $("#proctorCam"); if (!cam) return;
+  const overlay = $("#proctorOverlay"), out = $("#out-proctor");
+  const startB = $("#proctorStart"), scanB = $("#proctorScan"), stopB = $("#proctorStop"), auto = $("#proctorAuto");
+  let stream = null, busy = false, timer = null;
+  const rows = [];
+
+  const setBadge = (integrity, label) => {
+    overlay.innerHTML = integrity ? `<span class="proctor-badge pb-${integrity}">${esc(label || integrity)}</span>` : `<span class="po-idle">live</span>`;
+  };
+
+  startB.addEventListener("click", async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+      cam.srcObject = stream; await cam.play();
+      setBadge(null); scanB.disabled = false; stopB.disabled = false; startB.disabled = true;
+      out.innerHTML = `<div class="output-empty">Camera live. Click “Analyse frame”, or enable auto.</div>`;
+    } catch (e) { alert("Camera unavailable: " + e.message); }
+  });
+
+  const stop = () => {
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    stream = null; clearInterval(timer); timer = null; auto.checked = false;
+    scanB.disabled = true; stopB.disabled = true; startB.disabled = false; setBadge(null);
+  };
+  stopB.addEventListener("click", stop);
+
+  const analyse = async () => {
+    if (!stream || busy) return; busy = true; scanB.disabled = true;
+    try {
+      const img = canvasToDataURL(cam, cam.videoWidth, cam.videoHeight, 768);
+      const { result: r, meta } = await callApi("/api/proctor", { image: img, provider: PROVIDER });
+      const integ = r.integrity || "ok";
+      setBadge(integ, integ === "ok" ? "✓ OK" : integ === "flag" ? "⚑ FLAG" : "● attention");
+      const region = meta.backend ? (meta.backend.match(/op-aoai-(\w+)/) || [, ""])[1] : (meta.provider || "");
+      const ts = new Date().toLocaleTimeString();
+      const obs = (r.observations || []).slice(0, 2).join("; ");
+      rows.unshift(`<div class="plog-row ${esc(integ)}"><span class="plog-t">${ts}</span><span>${esc(r.note_for_invigilator || obs || "All clear")}<br><span class="cm" style="color:var(--muted);font-size:.76rem">${esc(r.students_visible)} present · gaze ${esc(r.gaze)} · phone ${r.phone_detected ? "yes" : "no"}</span></span><span class="plog-be">${esc(region)}</span></div>`);
+      out.innerHTML = `<div class="plog">${rows.slice(0, 8).join("")}</div>`;
+    } catch (err) { showError(out, err.message); }
+    finally { busy = false; if (stream) scanB.disabled = false; }
+  };
+  scanB.addEventListener("click", analyse);
+  auto.addEventListener("change", () => {
+    clearInterval(timer); timer = null;
+    if (auto.checked && stream) { analyse(); timer = setInterval(analyse, 10000); }
+  });
+  // stop camera when navigating away from the section
+  window.addEventListener("pagehide", stop);
+}
+
 // init
 renderBars();
 renderRouter();
 renderCatalogue();
 initHowto();
+initProviderSwitch();
+initVisionTabs();
+initOCR();
+initProctor();

@@ -8,7 +8,7 @@
 **License intent:** Apache-2.0 (code) + CC BY-SA-4.0 (content/curricula) — see §10
 **Architecture by:** Dhrumil Joshi and Rhythm Patel — released as an independent OSS public good
 
-> 🌐 **Live prototype:** https://pathshala.distillai.in — a working demo of the two MVP workflows (handwritten-answer grading & blueprint-constrained question-paper generation), powered by a real 3-tier model router (Groq LLMs). See [`/web`](./web).
+> 🌐 **Live prototype:** https://pathshala.distillai.in — working demos of grading, blueprint question-paper generation, mother-tongue explainers, **handwriting OCR**, and **live camera exam proctoring**. It runs on a **dual-plane router**: an open **Groq** floor and an enterprise **Azure OpenAI** plane behind an **Azure API Management load balancer** (multi-region pool + circuit breaker + managed-identity auth) for high-scalability intelligent routing. See [`/web`](./web) and [`/deploy/azure`](./deploy/azure).
 
 ---
 
@@ -261,6 +261,22 @@ The single most important cost-and-quality decision is **which model does which 
 
 > **The live prototype** at https://pathshala.distillai.in implements exactly this router against **Groq-hosted open models** — `llama-3.1-8b-instant` (cheap tier) → `llama-3.3-70b-versatile` (reasoning tier) → `openai/gpt-oss-120b` (hard tier) — to demonstrate the architecture end-to-end with zero proprietary lock-in. Swap the provider adapter and the same router targets Claude.
 
+### 7.1 Two planes — open floor + enterprise scale
+
+The router exposes **two interchangeable inference planes** (toggle them live on the site):
+
+- **Open (Groq)** — the floor. Cheap, fast, no lock-in, runs anywhere (incl. local Ollama/vLLM for T0/T1). Default for the public demo.
+- **Enterprise (Azure OpenAI)** — built for **scale on results day**. Azure OpenAI is fronted by an **Azure API Management** gateway that load-balances across **multiple regional backends** with a priority/weight **pool**, a per-backend **circuit breaker** (trips on 429/5xx and fails over), and **managed-identity** auth (no keys ever leave Azure). This is the [openai-apim-lb](https://learn.microsoft.com/en-us/samples/azure-samples/openai-apim-lb/openai-apim-lb/) pattern, deployed and live. Each response reports the region that served it.
+
+A single OpenAI deployment has a fixed TPM quota; pooling N regions multiplies throughput and adds resilience while the app still sees one endpoint. Full architecture, the routing policy, and a reproducible deploy: **[`deploy/azure/`](./deploy/azure)**.
+
+### 7.2 Vision — OCR & camera proctoring
+
+The same router carries **multimodal** requests (image inputs) to the provider's vision model (Azure `gpt-5-mini` on the enterprise plane), powering two live features:
+
+- **Handwriting OCR + grade** — photograph or upload a script; the model transcribes the handwriting *and* grades it against the rubric/reference answer in one pass (pluggable with Azure **Document Intelligence** for high-accuracy structured OCR).
+- **Live camera exam proctoring** — webcam frames are analysed for integrity signals (candidate present, gaze, extra person, phone) and surfaced as **advisory flags for a human invigilator** — never an automated accusation. Frames are analysed in-flight and discarded.
+
 ---
 
 ## 8. Cost model
@@ -377,14 +393,20 @@ open-pathshala/
 ├── LICENSE             # Apache-2.0
 ├── CONTRIBUTING.md     # how to contribute
 ├── web/                # deployable reference app (Node + Express)
-│   ├── server.js       # API: /api/grade, /api/paper, /api/explain, model router, /healthz
-│   ├── lib/router.js   # the 3-tier model router (cheap → reasoning → hard)
+│   ├── server.js       # API: grade, paper, explain, ocr-grade, proctor, router, /healthz
+│   ├── lib/router.js   # dual-plane router (Groq open floor + Azure OpenAI via APIM LB) + vision
+│   ├── lib/secrets.js  # SSM SecureString resolver (keys never in repo/image/env)
 │   ├── public/         # the prototype website (vanilla, no build step)
-│   ├── Dockerfile      # container for AWS App Runner / any container host
+│   ├── Dockerfile      # container for any container host
 │   └── package.json
 └── deploy/
-    └── aws/            # App Runner + ECR + Route53 deploy scripts & notes
+    ├── aws/            # serverless app: Lambda + API Gateway + CloudFront + Route53
+    └── azure/          # enterprise plane: APIM load balancer + Azure OpenAI (the openai-apim-lb pattern)
 ```
+
+**API surface** (`web/server.js`): `POST /api/grade`, `/api/paper`, `/api/explain`
+(all accept `provider: "groq" | "azure"`), `/api/ocr-grade` (vision), `/api/proctor`
+(vision), `GET /api/router`, `GET /healthz`.
 
 ### Run the prototype locally
 
