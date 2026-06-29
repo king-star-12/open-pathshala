@@ -52,7 +52,7 @@
             <a class="btn btn-primary" href="#demo">Try the live demo ↓</a>
             <a class="btn btn-ghost" href="https://github.com/king-star-12/open-pathshala" target="_blank" rel="noopener">Read the architecture →</a>
           </div>
-          <p class="hero-note">Live demo runs on open LLMs (Groq). The same router targets Claude in production.</p>
+          <p class="hero-note">Runs on efficient, low-cost AI — fast and affordable from one classroom to a whole state.</p>
         </div>
         <div class="hero-stats" id="heroStats">
           <div class="stat"><div class="stat-num" data-count="1471473">14.71 L</div><div class="stat-lbl">schools<br><small>UDISE+ 2024-25</small></div></div>
@@ -466,15 +466,15 @@
         <p class="kicker">Live prototype — really runs</p>
         <h2>Try the two MVP workflows.</h2>
         <p class="section-lede">
-          These call live LLMs server-side through the same <a href="#router">multi-provider router</a> the
-          architecture specifies. Each result shows the provider, model tier, the serving backend, latency and
-          per-task cost. <b>Teacher-in-the-loop</b>: every output is a reviewable draft, never a final mark.
+          Real AI, live. Switch the engine below and watch the same task run on the fast-and-free path or the
+          scale path — each result shows the <b>speed</b> and the <b>per-task cost in rupees</b>.
+          <b>Teacher-in-the-loop</b>: every output is a reviewable draft, never a final mark.
         </p>
 
-        <div class="provider-switch" id="providerSwitch" role="group" aria-label="Inference provider">
-          <span class="ps-label">Inference plane:</span>
-          <button class="ps-opt active" data-provider="groq">⚡ Open · Groq <small>(fast, cheap floor)</small></button>
-          <button class="ps-opt" data-provider="azure">🏢 Enterprise · Azure OpenAI <small>(APIM load-balanced)</small></button>
+        <div class="provider-switch" id="providerSwitch" role="group" aria-label="AI engine">
+          <span class="ps-label">AI engine:</span>
+          <button class="ps-opt active" data-provider="groq">⚡ Fast &amp; free <small>(open · self-host)</small></button>
+          <button class="ps-opt" data-provider="azure">🚀 Scale engine <small>(exam-week ready)</small></button>
         </div>
 
         <div class="tabs" role="tablist">
@@ -568,9 +568,8 @@
         <p class="kicker">Computer vision · live on your device</p>
         <h2>Scan handwriting. Watch the exam hall.</h2>
         <p class="section-lede">
-          These run real multimodal AI on an image from your <b>camera or a file</b> — handwriting OCR that
-          grades a scanned script, and a camera-feed exam proctor. Vision requests route through the
-          <b>enterprise Azure OpenAI plane (APIM-load-balanced)</b>; each result shows the serving region.
+          Real AI on an image from your <b>camera or a file</b> — handwriting OCR that reads a scanned script and
+          grades it, and a camera-feed exam proctor. Fast, low-cost, and built to scale across a whole district.
         </p>
 
         <div class="tabs" role="tablist">
@@ -662,65 +661,48 @@
       </div>
     </section>
 
-    <!-- ENTERPRISE SCALE — APIM LOAD BALANCER -->
+    <!-- SCALE — education-system scale at AI speed, cheaply -->
     <section id="scale" class="section">
       <div class="wrap">
-        <p class="kicker">Enterprise plane · built for board exams at state scale</p>
-        <h2>Intelligent routing that doesn't fall over on results day.</h2>
+        <p class="kicker">Scale</p>
+        <h2>Built to grade a whole state by morning.</h2>
         <p class="section-lede">
-          When a whole district uploads scripts the same week, a single model endpoint throttles (HTTP 429) and the
-          product dies. OpenPathshala fronts <b>multiple Azure OpenAI regions</b> with an <b>Azure API Management</b>
-          gateway that load-balances across them, trips a <b>circuit breaker</b> on a throttled region and fails over
-          in milliseconds — authenticating to OpenAI with a <b>managed identity</b>, so no key ever leaves Azure.
-          This is the live architecture serving the “Enterprise” toggle above.
+          When exams end, a district becomes a mountain of scripts. OpenPathshala grades each one in
+          <b>seconds for a few rupees</b> — and it runs the same whether one classroom or an entire state board
+          uploads at once. So feedback arrives in <b>days, not weeks</b>, teachers get their evenings back, and a
+          public system can actually afford it. <b>The whole education system, at AI speed.</b>
         </p>
 
         <div class="stage" style="background:linear-gradient(180deg,#0f1622,#131d2e)">
-          <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Azure APIM load balancer architecture">
-            <!-- client -->
-            <g transform="translate(30,120)">
-              <rect width="120" height="90" rx="10" class="s-card"/>
-              <text x="60" y="38" text-anchor="middle" class="s-label">OpenPathshala</text>
-              <text x="60" y="58" text-anchor="middle" class="s-label-sm">app / router</text>
-            </g>
-            <path class="anim a-flow" d="M154 165 h70" stroke="#e8722a" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-            <text x="160" y="155" class="s-label-sm">api-key</text>
-
-            <!-- APIM gateway -->
-            <g transform="translate(230,95)">
-              <rect width="170" height="140" rx="12" fill="#11233f" stroke="#2b6cb0" stroke-width="1.5"/>
-              <text x="85" y="34" text-anchor="middle" class="s-label" fill="#7fb2ff">Azure APIM</text>
-              <text x="85" y="54" text-anchor="middle" class="s-label-sm">gateway · pool</text>
-              <g transform="translate(20,70)">
-                <rect width="130" height="22" rx="5" fill="#0c1a30"/><text x="8" y="16" class="s-mono" style="font-size:11px" fill="#9fd0ff">⟲ load balance</text>
-                <rect y="28" width="130" height="22" rx="5" fill="#0c1a30"/><text x="8" y="44" class="s-mono" style="font-size:11px" fill="#9fd0ff">⛒ circuit breaker</text>
+          <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Same speed and cost from one classroom to a whole state">
+            <!-- constant speed/cost line across all scales -->
+            <line class="anim a-flow" x1="60" y1="70" x2="700" y2="70" stroke="#e8722a" stroke-width="2" stroke-dasharray="6 6"/>
+            <text x="60" y="56" class="s-mono" style="font-size:12px" fill="#f0a87a">⚡ ~6s per script · ₹~3 per script — flat at every scale</text>
+            <!-- ascending volume bars -->
+            <g transform="translate(0,250)">
+              <rect class="anim a-grow d1" x="80"  y="-46"  width="92" height="46"  rx="6" fill="#2ea372"/>
+              <rect class="anim a-grow d2" x="250" y="-104" width="92" height="104" rx="6" fill="#3a8fd0"/>
+              <rect class="anim a-grow d3" x="420" y="-150" width="92" height="150" rx="6" fill="#d98a1f"/>
+              <rect class="anim a-grow d4" x="590" y="-180" width="92" height="180" rx="6" fill="#e8722a"/>
+              <g fill="#aab6d0" font-family="Inter">
+                <text x="126" y="22" text-anchor="middle" style="font:600 13px Inter">Classroom</text>
+                <text x="126" y="40" text-anchor="middle" class="s-label-sm">40 students</text>
+                <text x="296" y="22" text-anchor="middle" style="font:600 13px Inter">School</text>
+                <text x="296" y="40" text-anchor="middle" class="s-label-sm">~1,200</text>
+                <text x="466" y="22" text-anchor="middle" style="font:600 13px Inter">District</text>
+                <text x="466" y="40" text-anchor="middle" class="s-label-sm">~90,000</text>
+                <text x="636" y="22" text-anchor="middle" style="font:600 13px Inter">State board</text>
+                <text x="636" y="40" text-anchor="middle" class="s-label-sm">~1.2 crore</text>
               </g>
-            </g>
-            <text x="252" y="255" class="s-label-sm">managed identity → cognitiveservices.azure.com</text>
-
-            <!-- two backends -->
-            <path class="anim a-flow d2" d="M404 140 h80" stroke="#2ea372" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-            <path class="anim a-flow d3" d="M404 190 h80" stroke="#2ea372" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-            <g transform="translate(488,92)">
-              <rect width="240" height="56" rx="10" class="s-card"/>
-              <circle cx="26" cy="28" r="9" class="s-green"/>
-              <text x="46" y="24" class="s-mono" style="font-size:12px">Azure OpenAI · East US</text>
-              <text x="46" y="42" class="s-label-sm">gpt-5-mini · priority 1</text>
-            </g>
-            <g transform="translate(488,182)">
-              <rect width="240" height="56" rx="10" class="s-card"/>
-              <circle cx="26" cy="28" r="9" class="s-green"/>
-              <text x="46" y="24" class="s-mono" style="font-size:12px">Azure OpenAI · East US 2</text>
-              <text x="46" y="42" class="s-label-sm">gpt-5-mini · priority 1</text>
             </g>
           </svg>
         </div>
 
         <div class="scale-grid">
-          <div class="scale-card"><div class="scale-n">2+</div><div class="scale-l">regional backends pooled today; add capacity by editing one list — no app change.</div></div>
-          <div class="scale-card"><div class="scale-n">429→0</div><div class="scale-l">throttled region trips the breaker; traffic shifts to a healthy region automatically.</div></div>
-          <div class="scale-card"><div class="scale-n">0 keys</div><div class="scale-l">managed-identity auth — no OpenAI key in the app, the repo, or the gateway policy.</div></div>
-          <div class="scale-card"><div class="scale-n">2 planes</div><div class="scale-l">open Groq floor + enterprise Azure plane — never locked to one vendor or one region.</div></div>
+          <div class="scale-card"><div class="scale-n">~6s</div><div class="scale-l">to grade one script. A district's whole exam — overnight, not over a month.</div></div>
+          <div class="scale-card"><div class="scale-n">₹~3</div><div class="scale-l">per script. Cheap-LLM intervention keeps it affordable from one school to a state.</div></div>
+          <div class="scale-card"><div class="scale-n">results day</div><div class="scale-l">built to absorb the exam-week surge, so it's there exactly when it matters most.</div></div>
+          <div class="scale-card"><div class="scale-n">online · off</div><div class="scale-l">runs on a connected lab or a rural school's single shared phone — same workflow.</div></div>
         </div>
       </div>
     </section>
@@ -738,7 +720,7 @@
             <p class="price-sub">Self-host the open-source toolkit.</p>
             <ul>
               <li>✓ Grading, paper-gen, OCR, explainers</li>
-              <li>✓ Open-model (Groq/Ollama) router</li>
+              <li>✓ Runs on free / local AI models</li>
               <li>✓ Apache-2.0 — yours to run</li>
               <li>✓ Community support</li>
             </ul>
@@ -790,7 +772,7 @@
           </p>
           <ul class="oss-points">
             <li>✅ Permissive Apache-2.0 license — maximizes adoption &amp; dependency</li>
-            <li>✅ Provider-agnostic router — Groq / Ollama / vLLM / Claude</li>
+            <li>✅ Vendor-neutral — never locked to one AI provider</li>
             <li>✅ DPDP-Act-aligned privacy: on-device redaction, consent ledger, teacher-in-the-loop</li>
             <li>✅ Offline-first so it reaches the schools that need it most</li>
           </ul>

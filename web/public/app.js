@@ -127,19 +127,13 @@ function showError(host, msg) {
 }
 function metaBar(meta) {
   if (!meta) return "";
-  const prov = meta.provider === "azure"
-    ? `<span class="chip" style="background:#e8f0fe;border-color:#b6d0fb;color:#2b6cb0">plane: <b>Azure · APIM LB</b></span>`
-    : `<span class="chip" style="background:#eef7f0;border-color:#bfe0cc;color:#1f7a52">plane: <b>Open · Groq</b></span>`;
-  const backend = meta.backend
-    ? `<span class="chip">region: <b>${esc((meta.backend.match(/op-aoai-(\w+)/) || [, meta.backend])[1])}</b></span>`
-    : "";
+  const engine = meta.provider === "azure"
+    ? `<span class="chip" style="background:#fff4e8;border-color:#f3d4b0;color:#c95a18">🚀 <b>Scale engine</b></span>`
+    : `<span class="chip" style="background:#eef7f0;border-color:#bfe0cc;color:#1f7a52">⚡ <b>Fast &amp; free</b></span>`;
   return `<div class="meta-bar">
-    ${prov}
-    <span class="chip chip-tier">tier: <b>${esc(meta.tier)}</b> (${esc(meta.analogue || "")})</span>
-    <span class="chip">model: <b>${esc(meta.model)}</b></span>
-    ${backend}
-    <span class="chip">⏱ <b>${(meta.latencyMs / 1000).toFixed(1)}s</b></span>
-    <span class="chip chip-cost">≈ <b>₹${meta.costINR}</b></span>
+    ${engine}
+    <span class="chip">⏱ graded in <b>${(meta.latencyMs / 1000).toFixed(1)}s</b></span>
+    <span class="chip chip-cost">cost ≈ <b>₹${meta.costINR}</b></span>
   </div>`;
 }
 async function callApi(path, body) {
